@@ -8,7 +8,7 @@ const args = require("minimist")(process.argv.slice(2))
 args['port']
 const port = args.port || 5555;
 
-//console.log(args["debug"])
+//console.log(args["debug"]) 
 
 if (args["help"]) {
     console.log('server.js [options]\
