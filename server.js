@@ -5,13 +5,14 @@ const fs = require("fs");
 const morgan = require('morgan');
 
 const args = require("minimist")(process.argv.slice(2))
-console.log(args)
+//console.log(typeof(args.log))
 args['port']
 args['log']
 const port = args.port || 5555;
-const log = args.log || false;
+const log = (args.log) == ('true')
+//console.log(typeof(log))
 
-//console.log(args["debug"]) 
+//console.log(args["debug"]) ß
 
 if (args["help"]) {
     console.log('server.js [options]\
