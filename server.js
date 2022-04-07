@@ -11,7 +11,7 @@ args['log']
 const port = args.port || 5555;
 const log = (args.log) == ('true')
 //console.log(typeof(log))
-
+ß
 //console.log(args["debug"]) ß
 
 if (args["help"]) {
