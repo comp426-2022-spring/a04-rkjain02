@@ -105,7 +105,7 @@ function coinFlips(flips) {
     for (var i = 0; i < flips; i++) {
         flip.push(coinFlip())
     }
-    return flip
+    return flip 
 }
 
 app.get('/app/flip/call/:type', (req, res) => {
