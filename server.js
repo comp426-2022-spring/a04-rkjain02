@@ -6,15 +6,17 @@ const morgan = require('morgan');
 
 const args = require("minimist")(process.argv.slice(2))
 //console.log(typeof(args.log))
-args['port']
-args['log']
-const port = args.port || 5555;
-const log = (args.log) == ('true')
+
+
+
+var port = args.port || 5555;
+var log = args.log || true
+var debug = args.debug || false;
 //console.log(typeof(log))
 
 //console.log(args["debug"]) ß
 
-if (args["help"]) {
+if (args.help === true) {
     console.log(`server.js [options]
   --port	Set the port number for the server to listen on. Must be an integer
               between 1 and 65535.
@@ -33,7 +35,7 @@ const server = app.listen(port, () => {
     console.log('App listening on port %PORT%'.replace('%PORT%', port))
 });
 
-if(args['debug']) {
+if(debug === true) {
     app.get("/app/log/access", (req, res) => {
         try {
             const stmt = db.prepare('SELECT * FROM accesslog').all()
@@ -47,7 +49,7 @@ if(args['debug']) {
     });
 
 }
-if (log) {
+if (log === true) {
     const WRITESTREAM = fs.createWriteStream(__dirname+ '/access.log', { flags: 'a' })
     const stmt = db.prepare('SELECT * FROM accesslog').all()
     // Set up the access logging middleware
@@ -149,6 +151,7 @@ app.use(function (req, res, next) {
     const stmt = db.prepare('INSERT INTO accesslog (remoteaddr, remoteuser, time, method, url, protocol, httpversion, secure, status, referer, useragent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
     const info = stmt.run(logdata.remoteaddr, logdata.remoteuser, logdata.time, logdata.method, logdata.url, logdata.protocol, logdata.httpversion, logdata.secure, logdata.status, logdata.referer, logdata.useragent)
     res.status(200).json(info)
+    next();
 });
 
 
