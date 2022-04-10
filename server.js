@@ -15,11 +15,16 @@ const log = (args.log) == ('true')
 //console.log(args["debug"]) ß
 
 if (args["help"]) {
-    console.log('server.js [options]\
-  \n--por	Set the port number for the server to listen on. Must be an integer between 1 and 65535.\
-  \n--debug	If set to `true`, creates endlpoints /app/log/access/ which returns a JSON access log from the database and /app/error which throws an error with the message "Error test successful." Defaults to `false`.\
-  \n--log		If set to false, no log files are written. Defaults to true. Logs are always written to database.\
-  \n--help  Return this message and exit.')
+    console.log(`server.js [options]
+  --port	Set the port number for the server to listen on. Must be an integer
+              between 1 and 65535.
+  --debug	If set to \`true\`, creates endlpoints /app/log/access/ which returns
+              a JSON access log from the database and /app/error which throws 
+              an error with the message "Error test successful." Defaults to 
+              \`false\`.
+  --log		If set to false, no log files are written. Defaults to true.
+              Logs are always written to database.
+  --help	Return this message and exit.`)
     process.exit(0)
 }
 
