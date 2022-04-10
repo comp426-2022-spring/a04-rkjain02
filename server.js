@@ -3,11 +3,15 @@ const app = express()
 const db = require("./database.js")
 const fs = require("fs");
 const morgan = require('morgan');
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
 const args = require("minimist")(process.argv.slice(2))
 //console.log(typeof(args.log))
 
-
+const server = app.listen(port, () => {
+    console.log('App listening on port %PORT%'.replace('%PORT%', port))
+});
 
 var port = args.port || 5555;
 var log = args.log || true
@@ -31,9 +35,7 @@ if (args.help === true) {
 }
 
 
-const server = app.listen(port, () => {
-    console.log('App listening on port %PORT%'.replace('%PORT%', port))
-});
+
 
 if(debug === true) {
     app.get("/app/log/access", (req, res) => {
