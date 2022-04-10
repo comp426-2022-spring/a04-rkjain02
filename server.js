@@ -52,7 +52,7 @@ if(debug === true) {
 if (log === true) {
     const WRITESTREAM = fs.createWriteStream(__dirname+ '/access.log', { flags: 'a' })
     const stmt = db.prepare('SELECT * FROM accesslog').all()
-    // Set up the access logging middleware
+    // Set up the access logging middleware 
     app.use(morgan('combined', { stream: WRITESTREAM }))
 }
 
