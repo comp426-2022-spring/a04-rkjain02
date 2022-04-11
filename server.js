@@ -5,11 +5,8 @@ const fs = require("fs");
 const morgan = require('morgan');
 
 const args = require("minimist")(process.argv.slice(2))
-console.log(args)
 args['port']
-args['log']
 const port = args.port || 5555;
-const log = args.log || false;
 
 //console.log(args["debug"]) 
 
@@ -41,7 +38,7 @@ if(args['debug']) {
     });
 
 }
-if (log) {
+if (args['log']) {
     const WRITESTREAM = fs.createWriteStream(__dirname+ '/access.log', { flags: 'a' })
     const stmt = db.prepare('SELECT * FROM accesslog').all()
     // Set up the access logging middleware
