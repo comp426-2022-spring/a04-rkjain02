@@ -1,61 +1,81 @@
 const express = require('express');
-const app = express()
-const db = require("./database.js")
-const fs = require("fs");
-const morgan = require('morgan');
+const app = express();
+const db = require('./database.js')
+const morgan = require('morgan')
+const fs = require('fs')
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
-const args = require("minimist")(process.argv.slice(2))
-//console.log(typeof(args.log))
-args['port']
-args['log']
-const port = args.port || 5555;
-const log = (args.log) == ('true')
-//console.log(typeof(log))
+// Get Port
+const args = require("minimist")(process.argv.slice(2));
+var port = args.port || 5555;
 
-//console.log(args["debug"]) ß
+// Start an app server
+const server = app.listen(port, () => {
+    console.log('App listening on port %PORT%'.replace('%PORT%', port));
+});
 
-const help = (`server.js [options]
---port	Set the port number for the server to listen on.Must be an integer
+
+args["debug"] || false
+var debug = args.debug
+args["log"] || true
+var log = args.log
+args["help"]
+
+if (args.help === true) {
+    console.log(`server.js [options]
+  --port	Set the port number for the server to listen on. Must be an integer
               between 1 and 65535.
---debug	If set to \`true\`, creates endlpoints /app/log/access/ which returns
+  --debug	If set to \`true\`, creates endlpoints /app/log/access/ which returns
               a JSON access log from the database and /app/error which throws 
               an error with the message "Error test successful." Defaults to 
               \`false\`.
   --log		If set to false, no log files are written. Defaults to true.
               Logs are always written to database.
   --help	Return this message and exit.`)
-
-
-
-if (args["help"]) {
-    console.log(help)
-    process.exit(0)  
+    process.exit(0)
 }
 
+// Logging to database
+if (log === true) {
+    // Use morgan for logging to files
+    // Create a write stream to append (flags: 'a') to a file
+    const accesslog = fs.createWriteStream('access.log', { flags: 'a' })
+    // Set up the access logging middleware
+    app.use(morgan('accesslog', { stream: accesslog }))
+}
 
-const server = app.listen(port, () => {
-    console.log('App listening on port %PORT%'.replace('%PORT%', port))
+// Middleware function
+app.use((req, res, next) => {
+    let logdata = {
+        remoteaddr: req.ip,
+        remoteuser: req.user,
+        time: Date.now(),
+        method: req.method,
+        url: req.url,
+        protocol: req.protocol,
+        httpversion: req.httpVersion,
+        status: res.statusCode,
+        referer: req.headers['referer'],
+        useragent: req.headers['user-agent']
+    }
+    const stmt = db.prepare('INSERT INTO accesslog (remoteaddr, remoteuser, time, method, url, protocol, httpversion, status, referer, useragent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    const info = stmt.run(logdata.remoteaddr, logdata.remoteuser, logdata.time, logdata.method, logdata.url, logdata.protocol, logdata.httpversion, logdata.status, logdata.referer, logdata.useragent)
+
+    next();
 });
 
-if(args['debug']) {
-    app.get("/app/log/access", (req, res) => {
-        try {
-            const stmt = db.prepare('SELECT * FROM accesslog').all()
-            res.status(200).json(stmt)
-        } catch {
-            console.error(e)
-        }
-    });
-    app.get("/app/error", (req, res) => {
-        throw new Error('Error test successful.')
-    });
+if (debug === true) {
+    // Access log endpoint
+    app.get('/app/log/access', (req, res) => {
+        const stmt = db.prepare('SELECT * FROM accesslog').all()
+        res.status(200).json(stmt)
+    })
 
-}
-if (log) {
-    const WRITESTREAM = fs.createWriteStream(__dirname+ '/access.log', { flags: 'a' })
-    const stmt = db.prepare('SELECT * FROM accesslog').all()
-    // Set up the access logging middleware
-    app.use(morgan('combined', { stream: WRITESTREAM }))
+    // Error endpoint
+    app.get('/app/error', (req, res) => {
+        throw new Error('Error test successful')
+    })
 }
 
 
