@@ -14,13 +14,26 @@ const log = (args.log) == ('true')
 
 //console.log(args["debug"]) ß
 
+const help = (`
+server.js [options]
+
+--port	Set the port number for the server to listen on. Must be an integer
+            between 1 and 65535.
+
+--debug	If set to true, creates endlpoints /app/log/access/ which returns
+            a JSON access log from the database and /app/error which throws 
+            an error with the message "Error test successful." Defaults to 
+            false.
+
+--log		If set to false, no log files are written. Defaults to true.
+            Logs are always written to database.
+
+--help	Return this message and exit.
+`)
+
 if (args["help"]) {
-    console.log('server.js [options]\
-  \n--port	Set the port number for the server to listen on. Must be an integer between 1 and 65535.\
-  \n--debug	If set to `true`, creates endlpoints /app/log/access/ which returns a JSON access log from the database and /app/error which throws an error with the message "Error test successful." Defaults to `false`.\
-  \n--log		If set to false, no log files are written. Defaults to true. Logs are always written to database.\
-  \n--help  Return this message and exit.')
-    process.exit(0)
+    console.log(help)
+    process.exit(0) 
 }
 
 
@@ -28,7 +41,7 @@ const server = app.listen(port, () => {
     console.log('App listening on port %PORT%'.replace('%PORT%', port))
 });
 
-if (args['debug']) {
+if(args['debug']) {
     app.get("/app/log/access", (req, res) => {
         try {
             const stmt = db.prepare('SELECT * FROM accesslog').all()
@@ -43,7 +56,7 @@ if (args['debug']) {
 
 }
 if (log) {
-    const WRITESTREAM = fs.createWriteStream(__dirname + '/access.log', { flags: 'a' })
+    const WRITESTREAM = fs.createWriteStream(__dirname+ '/access.log', { flags: 'a' })
     const stmt = db.prepare('SELECT * FROM accesslog').all()
     // Set up the access logging middleware
     app.use(morgan('combined', { stream: WRITESTREAM }))
@@ -62,22 +75,22 @@ app.get('/app/', (req, res) => {
 
 app.get('/app/flip/', (req, res) => {
     const flip = coinFlip(req.params.number)
-    const output = { "flip": flip }
+    const output = {"flip": flip}
     res.status(200).send(output)
 });
 
 function coinFlip() {
     var rand = Math.random()
     if (rand <= .50) {
-        return "heads"
+        return  "heads"
     }
-    return "tails"
+    return "tails" 
 }
 
 app.get('/app/flips/:number', (req, res) => {
     const flips = coinFlips(req.params.number)
     const summary = countFlips(flips)
-    const output = { "raw": flips, "summary": summary }
+    const output = {"raw": flips, "summary": summary}
     res.status(200).send(output)
 });
 
