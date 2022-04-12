@@ -9,8 +9,13 @@ const args = require("minimist")(process.argv.slice(2))
 args['port']
 args['log']
 const port = args.port || 5555;
-const log = (args.log) == ('true')
-//console.log(typeof(log))
+var log = false
+if(args.log == ('false')) {
+    log = false
+}
+else {
+    log = true
+}
 
 //console.log(args["debug"]) ß
 
@@ -29,35 +34,21 @@ const help = (`server.js [options]
 --help	Return this message and exit.
 `)
 
-console.log(`server.js [options]
-  --port	    Set the port number for the server to listen on. Must be an integer
-            between 1 and 65535.
-
-  --debug	    If set to \`true\`, creates endlpoints /app/log/access/ which returns
-            a JSON access log from the database and /app/error which throws 
-            an error with the message "Error test successful." Defaults to 
-            \`false\`.
-
-  --log		    If set to false, no log files are written. Defaults to true.
-            Logs are always written to database.
-
-  --help	    Return this message and exit.`)
-
 
 if (args["help"]) {
     console.log(`server.js [options]
-    --port	      Set the port number for the server to listen on. Must be an integer
+    --port      Set the port number for the server to listen on. Must be an integer
                 between 1 and 65535.
 
-    --debug	      If set to \`true\`, creates endlpoints /app/log/access/ which returns
+    --debug     If set to \`true\`, creates endlpoints /app/log/access/ which returns
                 a JSON access log from the database and /app/error which throws 
                 an error with the message "Error test successful." Defaults to 
                 \`false\`.
 
-    --log         If set to false, no log files are written. Defaults to true.
+    --log       If set to false, no log files are written. Defaults to true.
                 Logs are always written to database.
 
-    --help	      Return this message and exit.`)
+    --help      Return this message and exit.`)
     process.exit(0)  
 }
 
@@ -81,10 +72,10 @@ if(args['debug']) {
 
 }
 if (log) {
-    const WRITESTREAM = fs.createWriteStream(__dirname+ '/access.log', { flags: 'a' })
+    const accesslog = fs.createWriteStream('access.log', { flags: 'a' })
     const stmt = db.prepare('SELECT * FROM accesslog').all()
     // Set up the access logging middleware
-    app.use(morgan('combined', { stream: WRITESTREAM }))
+    app.use(morgan('accesslog', { stream: accesslog }))
 }
 
 
