@@ -17,9 +17,15 @@ else {
     log = true
 }
 
+const server = app.listen(port, () => {
+    console.log('App listening on port %PORT%'.replace('%PORT%', port))
+});
+
 //console.log(args["debug"])
 
-const help = (`
+
+if (args["help"]) {
+    console.log(`
 server.js [options]
 
 --port	Set the port number for the server to listen on. Must be an integer
@@ -35,17 +41,29 @@ server.js [options]
 
 --help	Return this message and exit.
 `)
-
-
-if (args["help"]) {
-    console.log(help)
-    process.exit(0)  
+    process.exit(0);
 }
 
-
-const server = app.listen(port, () => {
-    console.log('App listening on port %PORT%'.replace('%PORT%', port))
+app.use(function (req, res, next) {
+    let logdata = {
+        remoteaddr: req.ip,
+        remoteuser: req.user,
+        time: Date.now(),
+        method: req.method,
+        url: req.url,
+        protocol: req.protocol,
+        httpversion: req.httpVersion,
+        status: res.statusCode,
+        referer: req.headers['referer'],
+        useragent: req.headers['user-agent']
+    }
+    const stmt = db.prepare('INSERT INTO accesslog (remoteaddr, remoteuser, time, method, url, protocol, httpversion, status, referer, useragent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    const info = stmt.run(logdata.remoteaddr, logdata.remoteuser, logdata.time, logdata.method, logdata.url, logdata.protocol, logdata.httpversion, logdata.status, logdata.referer, logdata.useragent)
+    //res.status(200).json(info)
+    next();
 });
+
+
 
 if(args['debug']) {
     app.get("/app/log/access", (req, res) => {
@@ -143,24 +161,7 @@ function flipACoin(call) {
 
 }
 
-app.use(function (req, res, next) {
-    let logdata = {
-        remoteaddr: req.ip,
-        remoteuser: req.user,
-        time: Date.now(),
-        method: req.method,
-        url: req.url,
-        protocol: req.protocol,
-        httpversion: req.httpVersion,
-        status: res.statusCode,
-        referer: req.headers['referer'],
-        useragent: req.headers['user-agent'] 
-    }
-    const stmt = db.prepare('INSERT INTO accesslog (remoteaddr, remoteuser, time, method, url, protocol, httpversion, status, referer, useragent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-    const info = stmt.run(logdata.remoteaddr, logdata.remoteuser, logdata.time, logdata.method, logdata.url, logdata.protocol, logdata.httpversion, logdata.status, logdata.referer, logdata.useragent)
-    //res.status(200).json(info)
-    next();
-});
+
 
 
 
