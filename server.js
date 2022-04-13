@@ -23,9 +23,7 @@ const server = app.listen(port, () => {
 
 //console.log(args["debug"])
 
-
-if (args.help || args.h) {
-    console.log(`
+const help = (`
 server.js [options]
 
 --port	Set the port number for the server to listen on. Must be an integer
@@ -41,6 +39,9 @@ server.js [options]
 
 --help	Return this message and exit.
 `)
+
+if (args.help || args.h) {
+    console.log(help)
     process.exit(0);
 }
 
@@ -80,7 +81,7 @@ if (log) {
     //const stmt = db.prepare('SELECT * FROM accesslog').all()
 
     // Set up the access logging middleware
-    app.use(morgan('accesslog', { stream: accesslog }))
+    app.use(morgan('combined', { stream: accesslog }))
 }
 
 
