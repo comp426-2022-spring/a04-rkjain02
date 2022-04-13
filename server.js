@@ -24,7 +24,7 @@ const server = app.listen(port, () => {
 //console.log(args["debug"])
 
 
-if (args["help"]) {
+if (args.help || args.h) {
     console.log(`
 server.js [options]
 
@@ -77,7 +77,7 @@ if(args['debug']) {
 }
 if (log) {
     const accesslog = fs.createWriteStream('access.log', { flags: 'a' })
-    const stmt = db.prepare('SELECT * FROM accesslog').all()
+    //const stmt = db.prepare('SELECT * FROM accesslog').all()
 
     // Set up the access logging middleware
     app.use(morgan('accesslog', { stream: accesslog }))
