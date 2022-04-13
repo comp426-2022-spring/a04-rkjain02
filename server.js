@@ -17,13 +17,15 @@ else {
     log = true
 }
 
-//console.log(args["debug"]) ß
+//console.log(args["debug"])
 
-const help = (`server.js [options]
+const help = (`
+server.js [options]
+
 --port	Set the port number for the server to listen on. Must be an integer
             between 1 and 65535.
 
---debug	    If set to true, creates endlpoints /app/log/access/ which returns
+--debug	If set to true, creates endlpoints /app/log/access/ which returns
             a JSON access log from the database and /app/error which throws 
             an error with the message "Error test successful." Defaults to 
             false.
@@ -36,19 +38,7 @@ const help = (`server.js [options]
 
 
 if (args["help"]) {
-    console.log(`server.js [options]
-    --port        Set the port number for the server to listen on. Must be an integer
-                between 1 and 65535.
-
-    --debug       If set to \`true\`, creates endlpoints /app/log/access/ which returns
-                a JSON access log from the database and /app/error which throws 
-                an error with the message "Error test successful." Defaults to 
-                \`false\`.
-
-    --log         If set to false, no log files are written. Defaults to true.
-                Logs are always written to database.
-
-    --help        Return this message and exit.`)
+    console.log(help)
     process.exit(0)  
 }
 
@@ -70,6 +60,7 @@ if(args['debug']) {
 if (log) {
     const accesslog = fs.createWriteStream('access.log', { flags: 'a' })
     const stmt = db.prepare('SELECT * FROM accesslog').all()
+
     // Set up the access logging middleware
     app.use(morgan('accesslog', { stream: accesslog }))
 }
@@ -168,7 +159,8 @@ app.use(function (req, res, next) {
     }
     const stmt = db.prepare('INSERT INTO accesslog (remoteaddr, remoteuser, time, method, url, protocol, httpversion, secure, status, referer, useragent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
     const info = stmt.run(logdata.remoteaddr, logdata.remoteuser, logdata.time, logdata.method, logdata.url, logdata.protocol, logdata.httpversion, logdata.secure, logdata.status, logdata.referer, logdata.useragent)
-    res.status(200).json(info)
+    //res.status(200).json(info)
+    next()
 });
 
 
